@@ -1,0 +1,31 @@
+function [TE] = TEsignificance(x,y)
+
+n=length(x);
+
+TEshuffle=NaN(100,1);
+
+for i=1:100
+    xs=x(randperm(n));
+    TEs=transferEntropyPartition(xs,y,5,5);
+    TEshuffle(i,1)=TEs;
+end 
+
+p95=prctile(TEshuffle,95);
+TEreal=transferEntropyPartition(x,y,5,5);
+
+if TEreal>=p95;
+    TE=TEreal;
+else 
+    TE=0;
+end
+
+
+end
+
+this funciton is used to determine whether TE values are statistically significant or whether they are due to randomness. 
+Montecarlo technique is used. 
+x and y are the time series between which TE is computed. 
+time series x is randomly shuffled 100 times, and each time shuffled TE (sTE) is calculated. 
+TE real is the TE value of the two unshuffled time series. 
+If it is larger than the 95th percentile of the randomly shuffled TE values, it is considered statistically significant. The output of the funciton will be the real TE (unshuffled time series).
+If TEreal is smaller than the 95th percentile of the shuffled TE values, it is not considered statistically significant. In this case the output of the function will be 0.
