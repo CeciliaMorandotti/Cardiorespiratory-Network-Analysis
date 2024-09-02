@@ -1,0 +1,102 @@
+clc 
+clear all 
+close all 
+
+
+sTE=zeros(7,7);
+%this matrix will be used in the loop and will be filled with the calculated
+%significant transfer entropy values, for every participant consecutively. 
+%7x7: there are 7 phyiological variables, all Transfer Entropies (TEs) will be computed, meaning 49 TE values will be
+%calculated.
+
+allTE=NaN(12,49);
+%matrix will contain each participant's 49 TE values. 12 rows correspond to
+%12 patients, each row corresponds to a one dimensional version of the sTE
+%matrix. 
+
+
+IDOD=NaN(12,14);
+%matrix for indegree (columns 1 to 7) and outdegree (columns 8 to 14)
+%values. 
+
+alltotTE = NaN(12,1);
+%this matrix will contain total TE for all 12 participants. 
+
+for i=1:12
+    Data = importdata(['HC' num2str(i) '.csv']);
+    data = zerofilterM(Data.data);
+    % open file containing physiologiclal time series data for all 12
+    % participants, and replace all 0s with the median. 
+    for j=1:7;
+        for k=1:7;
+            if j==k ;
+                continue 
+                %skip where TransferEntropy=O
+            end
+
+            sTE(j,k)=TEsignificance((data(:,j)),(data(:,k)));
+
+            % calculate significant TEs with TEsignificance function, input
+            % TE values in sTE matrix.
+
+            alltotTE(i,1) = sum(sTE,[1 2]);
+            % input totTE in alltotTE matrix for each participant (row i) 
+            % in the alltotTE matrix. 
+
+            TEg=digraph(sTE);
+
+            Indegree=centrality(TEg,'Indegree', 'Importance', TEg.Edges.Weight);
+            IDOD(i,1:7)=Indegree';
+            %calculate ID centrality measure of all nodes for each patient and input
+            %into ID OD matrix row i, columns 1 to 7. 
+
+            Outdegree=centrality(TEg,'Outdegree', 'Importance', TEg.Edges.Weight);
+            IDOD(i,8:14)=Outdegree';
+            % calculate OD centrality measure of all nodes for each patient
+            % and input values into corresponding row (i) and columns (8 to
+            % 14) of the IDOD matrix. 
+
+        end 
+
+        end
+
+     allTE(i,1:7)=sTE(1,1:7);
+     allTE(i,8:14)=sTE(2,1:7);
+     allTE(i,15:21)=sTE(3,1:7);
+     allTE(i,22:28)=sTE(4,1:7);
+     allTE(i,29:35)=sTE(5,1:7);
+     allTE(i,36:42)=sTE(6,1:7);
+     allTE(i,43:49)=sTE(7,1:7);
+
+     %this places the TE from the 7x7 sTE matrix used in the loop
+     %into row i of the 12x49 matrix which will store all TE values for all
+     %participants. in the 12x49 matrix, each row corresponds to a
+     %participant, and each column corresponds to TE between two nodes. 
+
+end 
+
+allTE
+
+M=median(allTE)
+
+medianTE=NaN(7,7);
+
+for l=1:7
+
+medianTE(l,1:7)=M(1,((7*l)-6):(7*l));
+      
+end 
+
+medianTE
+% calculate median TE values of from allTE, input these values into median 
+% TE 7x7 matrix which will be used to graph the network diagrams. 
+
+medTotTE=median(alltotTE)
+
+
+medianIDOD=median(IDOD)
+IDm= medianIDOD(1,1:7)
+ODm= medianIDOD(1,8:14)
+
+% calculate median ID and OD values, input the values into matrix IDm and ODm  
+
