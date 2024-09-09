@@ -22,7 +22,7 @@ end
 
 end
 
-this funciton is used to determine whether TE values are statistically significant or whether they are due to randomness. 
+Notes: this funciton is used to determine whether TE values are statistically significant or whether they are due to randomness. 
 Montecarlo technique is used. 
 x and y are the time series between which TE is computed. 
 time series x is randomly shuffled 100 times, and each time shuffled TE (sTE) is calculated. 
